@@ -665,7 +665,7 @@ function renderToolbar() {
         : '<svg width="16" height="16" viewBox="0 0 24 24" fill="#16181D" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>'}</button>`;
   } else if (S.mode === 'scale') {
     right = SC ? `<span class="label" id="scaleN">${scaleNote()}</span>
-      <input class="slider" type="range" min="0" max="1000" value="${sliderFromR(S.r)}" aria-label="Number of games">` : '';
+      <input class="slider" type="range" min="0" max="1000" step="100" value="${sliderFromR(S.r)}" aria-label="Number of games">` : '';
   } else {
     right = '<span class="label">Operator</span>' + Object.keys(OPS).map((op) =>
       `<button class="chip op${S.prob && S.prob.op === op ? ' on' : ''}" data-act="op" data-v="${op}" aria-label="${OPS[op].name}">${OPS[op].sym}</button>`).join('');
