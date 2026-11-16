@@ -1,0 +1,5 @@
+/data/
+/work/
+/web_old/
+.DS_Store
+__pycache__/

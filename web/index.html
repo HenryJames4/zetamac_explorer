@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zetamac</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<!--
+  Zetamac data explorer. Data in data/*.js is built by pipeline/site_data.py.
+-->
+<script>window.ZDATA = {};</script>
+<script src="data/add.js"></script>
+<script src="data/sub.js"></script>
+<script src="data/mul.js"></script>
+<script src="data/div.js"></script>
+<script src="data/sessions.js"></script>
+<style>
+  :root {
+    --ink: #16181D; --ink-2: #3F4652; --muted: #4A505C;
+    --line: #E2E4E8; --line-2: #ECEDF0; --soft: #F3F4F6; --bg: #F6F6F3;
+    --accent: #2457D6; --key: #2E7031; --err: #A33A35; --think: #C9CDD4;
+    --you: #0E9488;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Instrument Sans', system-ui, sans-serif; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .page { max-width: 1000px; margin: 0 auto; padding: 20px 20px 32px; display: flex; flex-direction: column; gap: 16px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; }
+  .titles { display: flex; flex-direction: column; gap: 4px; }
+  h1 { margin: 0; font-family: var(--mono); font-size: 36px; line-height: 1; letter-spacing: -0.03em; }
+  .sub { margin: 0; font-size: 15px; line-height: 1.4; color: var(--ink-2); max-width: 380px; }
+  nav { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+  .link { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0; border: 0; background: none;
+          color: var(--ink-2); font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; }
+  .link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .link.play { color: var(--accent); font-weight: 600; }
+  .cite { margin: 4px 0 0; text-align: left; font-family: var(--mono); font-size: 13px; line-height: 1.6; background: #fff;
+          border: 1px solid #D5D7DC; border-radius: 12px; padding: 16px 20px; color: var(--ink-2); white-space: pre-wrap;
+          width: 100%; }
+  .cite[hidden] { display: none; }
+
+  .box { background: #fff; border: 1px solid var(--line); border-radius: 20px; overflow: hidden;
+         box-shadow: 0 1px 2px rgba(22,24,29,.05), 0 12px 32px rgba(22,24,29,.06); }
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+             padding: 10px 16px; border-bottom: 1px solid var(--line-2); background: #FAFAF8; }
+  .tabs { display: flex; gap: 4px; background: #EEEFF2; padding: 4px; border-radius: 12px; }
+  .tab { height: 40px; padding: 0 16px; border-radius: 9px; border: 0; background: transparent; color: var(--muted);
+         font-size: 14px; font-weight: 600; cursor: pointer; }
+  .tab.on { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(22,24,29,.12); }
+  .ctrls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .chip { height: 40px; min-width: 44px; padding: 0 14px; border-radius: 9px; border: 1px solid #D5D7DC; background: #fff;
+          font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  .chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .chip.op { font-family: var(--mono); font-size: 18px; padding: 0; width: 44px; }
+  .label { font-size: 13px; color: var(--muted); margin-right: 4px; }
+  .body { padding: 16px 24px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* Live session */
+  .game { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .game-bar { display: flex; justify-content: space-between; padding: 10px 16px; font-size: 14px; color: var(--ink-2);
+              background: #FAFAF8; border-bottom: 1px solid var(--line-2); }
+  .game-bar b { font-family: var(--mono); color: var(--ink); }
+  .stage { height: 92px; display: flex; align-items: center; justify-content: center; background: #F1F2F4;
+           font-family: var(--mono); font-size: 34px; font-weight: 600; }
+  .stage .prob { display: flex; align-items: center; gap: 14px; }
+  .input { display: inline-flex; align-items: center; min-width: 110px; height: 52px; padding: 0 12px; border-radius: 6px;
+           background: #fff; border: 2px solid var(--accent); }
+  .ch { padding: 0 1px; border-radius: 3px; }
+  .ch.wrong { color: #B42318; background: #FDE7E5; }
+  .caret { display: inline-block; width: 2px; height: 30px; margin-left: 2px; background: var(--ink); }
+  .over { font-size: 26px; }
+  .rec { display: flex; flex-direction: column; gap: 10px; }
+  .rec-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; }
+  .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--muted); }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .chart { display: flex; gap: 6px; }
+  .yaxis { position: relative; flex: 0 0 52px; height: 270px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .yaxis .t { position: absolute; right: 0; }
+  .yaxis .title { position: absolute; left: 0; writing-mode: vertical-rl; transform: translateY(50%) rotate(180deg);
+                  font-family: 'Instrument Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+  .plot { position: relative; flex: 1 1 auto; min-width: 0; height: 270px; overflow: hidden; }
+  .grid { position: absolute; left: 0; right: 0; border-top: 1px dashed #D5D7DC; }
+  .grid.base { border-top: 2px solid var(--ink); }
+  .bars { position: relative; display: flex; align-items: flex-end; justify-content: flex-end; gap: 8px; height: 270px; }
+  .bar { flex: 0 0 52px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px;
+         background: transparent; border: 0; border-radius: 8px; padding: 2px 0 6px; cursor: pointer; font-family: var(--mono); }
+  .bar:hover .stack { filter: brightness(1.1); }
+  .bar .top { font-size: 12px; font-weight: 700; }
+  .stack { display: flex; flex-direction: column-reverse; width: 42px; border-radius: 5px 5px 0 0; overflow: hidden; }
+  .seg { color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;
+         border-top: 1px solid rgba(255,255,255,.45); overflow: hidden; }
+  .plab { height: 42px; white-space: pre-line; font-size: 11px; line-height: 1.2; text-align: center; color: var(--muted); }
+  .note { margin: 0; font-size: 14px; line-height: 1.5; color: var(--muted); }
+
+  /* By problem */
+  .p-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .p-title { font-family: var(--mono); font-size: 44px; font-weight: 700; line-height: 1; }
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; min-width: min(100%, 420px); }
+  .stat { background: var(--soft); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+  .stat span { font-size: 12px; color: var(--muted); }
+  .stat b { font-family: var(--mono); font-size: 22px; }
+  .p-cols { display: flex; flex-wrap: wrap; gap: 24px; }
+  .p-col { flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+  .h3 { font-size: 14px; font-weight: 600; }
+  .hist { position: relative; height: 220px; display: flex; align-items: flex-end; gap: 2px; border-bottom: 2px solid var(--ink); }
+  .hbar { flex: 1 1 0; min-width: 0; border-radius: 2px 2px 0 0; }
+  .vline { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed var(--ink); }
+  .vlab { position: absolute; top: 4px; font-size: 12px; font-weight: 600; padding-left: 6px; }
+  .you { position: absolute; top: 24px; bottom: 0; width: 3px; margin-left: -1px; background: var(--you); }
+  .youlab { position: absolute; top: 24px; font-size: 12px; font-weight: 700; color: #0B6F66; padding-left: 6px; }
+  .xaxis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .heatwrap { display: flex; gap: 8px; }
+  .rowlab { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; color: var(--muted); text-align: center; }
+  .heat { flex: 1 1 auto; min-width: 0; display: grid; gap: 1px; background: #fff; }
+  .cell { border: 0; padding: 0; cursor: pointer; position: relative; }
+  .cell.hit { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--you); z-index: 2; }
+  .collab { font-size: 12px; color: var(--muted); text-align: center; }
+  .scale { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .scale i { flex: 1 1 auto; height: 10px; border-radius: 999px;
+             background: linear-gradient(90deg, #F9D057, #F28C38, #D6456A, #8E2C8C, #3B1C6E); }
+  .hint { font-size: 13px; color: var(--muted); }
+  .scale-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  #grid { width: 100%; max-width: 860px; aspect-ratio: 2 / 1; display: block; }
+  .answers { width: 100%; max-width: 860px; text-align: right; font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
+  .answers b { display: inline-block; min-width: 11ch; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .slider { width: 200px; accent-color: var(--ink); }
+  footer { display: flex; justify-content: center; }
+  .badge { font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: #FDF0D5; color: #7A4E00; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="titles">
+    <h1>Zetamac</h1>
+    <p class="sub">Mental arithmetic across 300+ million trials<br>and 7 million sessions.</p>
+    </div>
+    <nav aria-label="Resources">
+      <a class="link" href="#">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>Paper</a>
+      <a class="link" href="#">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Data</a>
+      <a class="link" href="#">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>GitHub</a>
+      <button class="link" type="button" id="citeBtn" aria-expanded="false" aria-controls="cite">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h4v4H7zM7 11c0 3-1 5-3 6M15 7h4v4h-4zM15 11c0 3-1 5-3 6"/></svg>Cite</button>
+      <a class="link play" href="https://arithmetic.zetamac.com/" target="_blank" rel="noopener">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>Play Zetamac</a>
+    </nav>
+    <pre class="cite" id="cite" hidden>@article{zetamac2026,
+  title   = {[PAPER TITLE]},
+  author  = {Arthur, Henry and [CO-AUTHORS]},
+  journal = {[JOURNAL]},
+  year    = {[YEAR]}
+}</pre>
+  </header>
+
+  <section class="box" aria-label="Interactive data explorer">
+    <div class="toolbar" id="toolbar"></div>
+    <div class="body" id="body"></div>
+  </section>
+
+</div>
+
+<script>
+/* ============================== STATE ============================== */
+const S = { t: 0, paused: false, session: 0, mode: 'live', prob: null };
+const GAME_MS = 120000, CYCLE = 124000;
+const BINS = 32, HIST_MAX = 8000, BIN_W = HIST_MAX / BINS;
+
+/* ============================== HELPERS ============================== */
+const fmt = (ms) => (ms / 1000).toFixed(2) + ' s';
+/* RT -> colour on a log scale between an operator's fastest and slowest heatmap cell. */
+const rtColor = (ms, hm) => color(Math.log(ms / hm.lo) / Math.log(hm.hi / hm.lo));
+function color(x) {
+  const stops = [[249,208,87],[242,140,56],[214,69,106],[142,44,140],[59,28,110]];   // fast (yellow) to slow (indigo)
+  const v = Math.max(0, Math.min(0.9999, x)) * (stops.length - 1);
+  const i = Math.floor(v), f = v - i, a = stops[i], b = stops[i + 1];
+  return 'rgb(' + a.map((q, j) => Math.round(q + (b[j] - q) * f)).join(',') + ')';
+}
+
+/* Problem coordinates: every problem is (op, r, c) on its operator's grid. */
+const OPS = {
+  add: { sym: '+', name: 'addition',       rows: [2, 100], cols: [2, 100], rowLabel: 'First operand', colLabel: 'Second operand (2 → 100)', k: 1 },
+  sub: { sym: '−', name: 'subtraction',    rows: [2, 100], cols: [2, 100], rowLabel: 'Subtrahend',    colLabel: 'Difference (2 → 100)',     k: 2 },
+  mul: { sym: '×', name: 'multiplication', rows: [2, 12],  cols: [2, 100], rowLabel: 'Small factor',  colLabel: 'Large factor (2 → 100)',   k: 3 },
+  div: { sym: '÷', name: 'division',       rows: [2, 12],  cols: [2, 100], rowLabel: 'Divisor',       colLabel: 'Quotient (2 → 100)',       k: 4 }
+};
+function probOf(op, r, c) {
+  if (op === 'add') return { text: r + ' + ' + c, ans: r + c, top: r, bot: c };
+  if (op === 'sub') return { text: (r + c) + ' − ' + r, ans: c, top: r + c, bot: r };
+  if (op === 'mul') return { text: r + ' × ' + c, ans: r * c, top: r, bot: c };
+  return { text: (r * c) + ' ÷ ' + r, ans: c, top: r * c, bot: r };
+}
+
+/* ============================== DATA ==============================
+   ZDATA[op].cells[(r - r0) * nCols + (c - c0)] = [median ms, n, first-try %, hist]
+   hist = trial counts in 250 ms bins over 0-8 s, then one overflow bin (> 8 s).
+   ZDATA.sessions = [{ label, score, trials: [[op, R, C, rt | null, keys]] }],
+   keys one char per press ('<' = backspace); rt null = unfinished at time-out.
+   =================================================================== */
+const OP_KEYS = ['add', 'sub', 'mul', 'div'];
+function cell(op, r, c) {
+  const d = ZDATA[op], nCols = d.cols[1] - d.cols[0] + 1;
+  return d.cells[(r - d.rows[0]) * nCols + (c - d.cols[0])];
+}
+function meanRt(op, r, c) {
+  const x = cell(op, r, c);
+  return x ? x[0] : null;
+}
+function problemStats(op, r, c) {
+  const [med, n, firstTry, hist] = cell(op, r, c);
+  return { med, n, firstTry, hist };
+}
+/* Share of this problem's trials slower than ms, linear within the 250 ms bin. */
+function slowerShare(hist, n, ms) {
+  const b = Math.min(BINS, Math.floor(ms / BIN_W));
+  let above = 0;
+  for (let i = b + 1; i <= BINS; i++) above += hist[i];
+  const inBin = b < BINS ? 1 - (ms - b * BIN_W) / BIN_W : 0.5;   // overflow bin has no width: count half
+  return (above + hist[b] * inBin) / n;
+}
+let _sessions = null;
+function sessions() {
+  return _sessions || (_sessions = ZDATA.sessions.map((s) => {
+    let t = 0;
+    const trials = s.trials.map(([o, R, C, rt, ks]) => {
+      const op = OP_KEYS[o], pr = probOf(op, R, C), ans = String(pr.ans);
+      let buf = '';
+      const keys = [...ks].map((ch) => {
+        if (ch === '<') { buf = buf.slice(0, -1); return { back: true }; }
+        buf += ch;
+        return { d: ch, wrong: !ans.startsWith(buf) };
+      });
+      const tr = withTiming({ start: t, rt: rt == null ? GAME_MS - t + 1 : rt, op, R, C, pr, keys });
+      t += tr.rt;
+      return tr;
+    });
+    const slowest = Math.max(...s.trials.filter((x) => x[3] != null).map((x) => x[3]));
+    return { label: s.label, score: s.score, trials, slowest };
+  }));
+}
+
+/* Keystrokes are spread evenly across the trial's RT (the data has trial RTs,
+   not per-key timestamps), matching Fig. C in the paper. */
+function withTiming(tr) {
+  tr.end = tr.start + tr.rt;
+  tr.seg = tr.rt / Math.max(1, tr.keys.length);
+  tr.keys.forEach((k, i) => { k.t = tr.start + (i + 1) * tr.seg; });
+  return tr;
+}
+
+/* ============================== LIVE VIEW ============================== */
+const STACK_H = 190, BASE = 52;          // px geometry of the recording chart
+let liveBars = [];
+
+function renderLive(now) {
+  const sess = sessions()[S.session];
+  const gt = S.t % CYCLE, over = gt >= GAME_MS, tt = Math.min(gt, GAME_MS);
+  const done = sess.trials.filter((x) => x.end <= tt);
+  const cur = over ? null : sess.trials.find((x) => x.start <= tt && x.end > tt);
+  const chars = [];
+  if (cur) cur.keys.forEach((k) => { if (k.t > tt) return; if (k.back) chars.pop(); else chars.push(k); });
+  // Y-axis top: the session's slowest completed trial, rounded up to the tick step.
+  const step = sess.slowest > 6000 ? 2000 : 1000, MAXRT = Math.ceil(sess.slowest / step) * step;
+  const px = (ms) => Math.max(0, Math.min(STACK_H, (ms / MAXRT) * STACK_H));
+
+  liveBars = done.slice(-13).map((x) => ({ x, partial: false }));
+  if (cur) liveBars.push({ x: cur, partial: true });
+  const barsHTML = liveBars.map(({ x, partial }, i) => {
+    const segs = partial && !x.keys.length
+      ? `<div class="seg" style="height:${px(tt - x.start).toFixed(1)}px;background:var(--think)"></div>`
+      : x.keys.map((k, j) => {
+      const s0 = x.start + j * x.seg;
+      if (!partial || k.t <= tt) {
+        const c = k.wrong || k.back ? 'var(--err)' : 'var(--key)';
+        const label = x.seg > 700 ? (k.back ? '⌫' : k.d) : '';
+        return `<div class="seg" style="height:${px(x.seg).toFixed(1)}px;background:${c}">${label}</div>`;
+      }
+      if (s0 <= tt) return `<div class="seg" style="height:${px(tt - s0).toFixed(1)}px;background:var(--think)"></div>`;
+      return '';
+    }).join('');
+    const aria = `${x.pr.text}, ${partial ? 'in progress' : fmt(x.rt)}. Show this problem.`;
+    return `<button class="bar" data-act="bar" data-i="${i}" aria-label="${aria}">
+      <span class="top">${partial ? '…' : x.pr.ans}</span>
+      <div class="stack">${segs}</div>
+      <span class="plab">${x.pr.top}\n${OPS[x.op].sym}\n${x.pr.bot}</span></button>`;
+  }).join('');
+
+  const ticks = [];
+  for (let v = 0; v <= MAXRT; v += step) ticks.push(v);
+  const caretOn = S.paused || Math.floor(now / 500) % 2 === 0;
+  document.getElementById('body').innerHTML = `
+    <div class="game">
+      <div class="game-bar"><span>Seconds left: <b>${Math.max(0, Math.ceil((GAME_MS - tt) / 1000))}</b></span><span>Score: <b>${done.length}</b></span></div>
+      <div class="stage">${over || !cur ? `<span class="over">Time's up · Score ${done.length}</span>` : `
+        <div class="prob"><span>${cur.pr.text} =</span><span class="input">${chars.map((c) =>
+          `<span class="ch${c.wrong ? ' wrong' : ''}">${c.d}</span>`).join('')}<span class="caret" style="opacity:${caretOn ? 1 : 0}"></span></span></div>`}
+      </div>
+    </div>
+    <div class="rec">
+      <div class="rec-head">
+        <span class="eyebrow">Recording</span>
+        <div class="legend">
+          <span><i class="sw" style="background:var(--key)"></i>Keystroke</span>
+          <span><i class="sw" style="background:var(--err)"></i>Wrong digit or backspace</span>        </div>
+      </div>
+      <div class="chart">
+        <div class="yaxis"><span class="title" style="bottom:${BASE + STACK_H / 2}px">RT (ms)</span>${ticks.map((v) =>
+          `<span class="t" style="bottom:${BASE - 7 + (v / MAXRT) * STACK_H}px">${v}</span>`).join('')}</div>
+        <div class="plot">
+          ${ticks.slice(1).map((v) => `<span class="grid" style="bottom:${BASE + (v / MAXRT) * STACK_H}px"></span>`).join('')}
+          <span class="grid base" style="bottom:${BASE - 1}px"></span>
+          <div class="bars">${barsHTML}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ============================== PROBLEM VIEW ============================== */
+const heatCache = {};
+function heatFor(op) {
+  if (heatCache[op]) return heatCache[op];
+  const info = OPS[op];
+  const rStep = op === 'add' || op === 'sub' ? 3 : 1, cStep = 3;
+  const rows = [], cols = [];
+  for (let v = info.rows[0]; v <= info.rows[1]; v += rStep) rows.push(v);
+  for (let v = info.cols[0]; v <= info.cols[1]; v += cStep) cols.push(v);
+  const vals = [];
+  let lo = Infinity, hi = -Infinity;
+  rows.forEach((r0) => cols.forEach((c0) => {
+    let s = 0, n = 0;
+    for (let r = r0; r < r0 + rStep && r <= info.rows[1]; r++)
+      for (let c = c0; c < c0 + cStep && c <= info.cols[1]; c++) {
+        const x = meanRt(op, r, c);
+        if (x != null) { s += x; n++; }
+      }
+    const m = s / n;   // cell colour = unweighted mean of the block's per-problem medians
+    lo = Math.min(lo, m); hi = Math.max(hi, m);
+    vals.push({ r0, c0, m, rc: Math.min(r0 + Math.floor(rStep / 2), info.rows[1]), cc: Math.min(c0 + 1, info.cols[1]) });
+  }));
+  return (heatCache[op] = { cols, vals, lo, hi, rStep, cStep });
+}
+
+let cur = null;   // current problem stats
+function setProblem(op, r, c, userRt) {
+  S.prob = { op, r, c, userRt };
+  cur = { ...problemStats(op, r, c), pr: probOf(op, r, c) };
+}
+
+function renderProblem() {
+  const pb = S.prob, info = OPS[pb.op], hm = heatFor(pb.op);
+  const hasUser = pb.userRt != null;
+  const cells = hm.vals.map((v, i) => {
+    const hit = pb.r >= v.r0 && pb.r < v.r0 + hm.rStep && pb.c >= v.c0 && pb.c < v.c0 + hm.cStep;
+    const q = probOf(pb.op, v.rc, v.cc);
+    return `<button class="cell${hit ? ' hit' : ''}" data-act="cell" data-i="${i}" aria-label="${q.text}, median ${fmt(meanRt(pb.op, v.rc, v.cc))}"
+      style="height:${pb.op === 'mul' || pb.op === 'div' ? 18 : 7}px;background:${rtColor(v.m, hm)}"></button>`;
+  }).join('');
+
+  document.getElementById('body').innerHTML = `
+    <div class="p-head">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="eyebrow">Problem</span>
+        <span class="p-title">${cur.pr.text} = ${cur.pr.ans}</span>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>Times answered</span><b>${cur.n.toLocaleString('en-US')}</b></div>
+        <div class="stat"><span>Median RT</span><b>${fmt(cur.med)}</b></div>
+        <div class="stat"><span>First-try correct</span><b>${cur.firstTry}%</b></div>
+      </div>
+    </div>
+    <div class="p-cols">
+      <div class="p-col">
+        <div class="row">
+          <span class="h3">Response times for this problem</span>
+        </div>
+        <div class="hist" id="hist"></div>
+        <div class="xaxis"><span>0 s</span><span>2 s</span><span>4 s</span><span>6 s</span><span>8 s</span></div>
+        ${hasUser ? `<span style="font-size:14px;color:var(--ink-2)">This player took <strong style="color:#0B6F66">${fmt(pb.userRt)}</strong>, faster than ${Math.round(slowerShare(cur.hist, cur.n, pb.userRt) * 100)}% of attempts.</span>` : ''}
+      </div>
+      <div class="p-col" style="flex-basis:340px">
+        <span class="h3">Every ${info.name} problem, by median RT</span>
+        <div class="heatwrap">
+          <span class="rowlab">${info.rowLabel}</span>
+          <div class="heat" style="grid-template-columns:repeat(${hm.cols.length},minmax(0,1fr))">${cells}</div>
+        </div>
+        <span class="collab">${info.colLabel}</span>
+        <div class="scale"><span>fast · ${fmt(hm.lo)}</span><i></i><span>${fmt(hm.hi)} · slow</span></div>
+        <span class="hint">Select any cell to jump to that problem.</span>
+      </div>
+    </div>`;
+  renderHist();
+}
+
+/* Full RT histogram over 0-8 s; trials over 8 s are not drawn. */
+function renderHist() {
+  const hist = document.getElementById('hist'), pb = S.prob;
+  const bins = cur.hist.slice(0, BINS), maxF = Math.max(...bins), hm = heatFor(pb.op);
+  const medX = Math.min(99, (cur.med / HIST_MAX) * 100);
+  const userX = pb.userRt != null ? Math.min(99, (pb.userRt / HIST_MAX) * 100) : null;
+  hist.innerHTML =
+    bins.map((x, b) => `<span class="hbar" style="height:${(x / maxF * 92).toFixed(1)}%;background:${rtColor((b + 0.5) * BIN_W, hm)}"></span>`).join('') +
+    `<span class="vline" style="left:${medX}%"></span><span class="vlab" style="left:${medX}%">median</span>` +
+    (userX != null ? `<span class="you" style="left:${userX}%"></span><span class="youlab" style="left:${userX}%">this player</span>` : '');
+}
+
+/* ============================== ALL GAMES VIEW ============================== */
+const TICK = 100, FADE = 6;     // timeline step (ms) and flash-and-fade length (steps)
+const R_MIN = 7;                // grid is 2r x r games; r = 7 gives 98
+const IDLE = [228, 230, 234], VIVID = [null, [46, 112, 49], [163, 58, 53]];   // --key and --err
+let SC = null;                  // pool of real games; timeline byte = colour << 4 | fade step, 0x80 = answer
+function answerOf(p) {
+  const [, a, op, b] = p.match(/(\d+)([-+*/])(\d+)/), x = +a, y = +b;
+  return String(op === '+' ? x + y : op === '-' ? x - y : op === '*' ? x * y : x / y);
+}
+function buildScale() {
+  const games = ZDATA.scale.games.map((g) => {
+    let t = 0;
+    const trials = g.split(',').map((str) => {
+      const [rt, prob, keys] = str.split(':'), tr = { s: t, n: +rt, prob, keys, ans: answerOf(prob) };
+      t += tr.n;
+      return tr;
+    });
+    return { trials, len: t };
+  });
+  const off = new Int32Array(games.length), len = Int32Array.from(games, (g) => g.len);
+  let total = 0;
+  games.forEach((g, i) => { off[i] = total; total += g.len; });
+  const tl = new Uint8Array(total);
+  games.forEach((g, i) => g.trials.forEach((tr) => {
+    let buf = '';
+    // Keystrokes spread evenly across the trial, as in the live view.
+    tr.at = [...tr.keys].map((ch, j) => {
+      buf = ch === '<' ? buf.slice(0, -1) : buf + ch;
+      const col = ch !== '<' && tr.ans.startsWith(buf) ? 1 : 2;
+      const at = Math.max(tr.s, Math.floor(tr.s + (j + 1) * tr.n / tr.keys.length) - 1);
+      for (let f = 0; f < FADE; f++) {
+        const x = off[i] + (at + f) % g.len, e = tl[x] & 0x7F;
+        if (!e || f < (e & 15) || (f === (e & 15) && col === 2)) tl[x] = (tl[x] & 0x80) | (col << 4) | f;
+      }
+      return at;
+    });
+    tl[off[i] + tr.at[tr.at.length - 1]] |= 0x80;
+  }));
+  // Colour lookup for every timeline byte: vivid on the keystroke, fading back to idle.
+  const lut = new Uint32Array(256), css = [];
+  for (let v = 0; v < 256; v++) {
+    const col = (v >> 4) & 3, f = v & 15;
+    const c = col === 1 || col === 2 ? VIVID[col].map((x, j) => Math.round(x + (IDLE[j] - x) * Math.min(1, f / FADE) ** 1.5)) : IDLE;
+    lut[v] = 0xFF000000 | (c[2] << 16) | (c[1] << 8) | c[0];
+    css[v] = `rgb(${c.join(',')})`;
+  }
+  const rMax = Math.floor(Math.sqrt(ZDATA.scale.total / 2));
+  SC = { games, tl, off, len, lut, css, pool: games.length, rMax, t: 0, answers: 0 };
+  if (!S.r) S.r = R_MIN;
+}
+function loadScale() {
+  if (SC || document.getElementById('scaleData')) return;
+  const s = document.createElement('script');
+  s.id = 'scaleData'; s.src = 'data/scale.js';
+  s.onload = () => { buildScale(); renderAll(); };
+  document.head.appendChild(s);
+}
+const mix = (i, k) => { let h = Math.imul(i ^ k, 2654435761); h ^= h >>> 15; return Math.imul(h, 2246822519) >>> 0; };
+const rFromSlider = (v) => Math.round(R_MIN * Math.pow(SC.rMax / R_MIN, v / 1000));
+const sliderFromR = (r) => Math.round(1000 * Math.log(r / R_MIN) / Math.log(SC.rMax / R_MIN));
+function scaleNote() {
+  const n = 2 * S.r * S.r, shown = Number(n.toPrecision(n < 1000 ? 1 : 2));   // rounded for display
+  return `<b>${shown.toLocaleString('en-US')}</b> games`;
+}
+function renderScale() {
+  document.getElementById('body').innerHTML = SC ? `
+    <div class="scale-wrap">
+      <canvas id="grid"></canvas>
+      <div class="answers">Answers: <b id="answers">0</b></div>
+    </div>` : '<span class="hint">Loading games…</span>';
+}
+/* Per-pixel game index, start offset and loop length; rebuilt when the grid or canvas changes. */
+function layout(r, resR) {
+  const cols = 2 * r, resC = 2 * resR, b = r / resR, n = resR * resC;
+  const base = new Int32Array(n), ph = new Int32Array(n), ln = new Int32Array(n), game = new Int32Array(n);
+  for (let y = 0; y < resR; y++) for (let x = 0; x < resC; x++) {
+    const j = y * resC + x;
+    const gy = Math.floor(y * b) + (b > 1 ? mix(j, 3) % Math.floor(b) : 0);
+    const gx = Math.floor(x * b) + (b > 1 ? mix(j, 4) % Math.floor(b) : 0);
+    const i = gy * cols + gx, p = i < SC.pool ? i : mix(i, 1) % SC.pool;
+    game[j] = p; base[j] = SC.off[p]; ln[j] = SC.len[p]; ph[j] = mix(i, 2) % ln[j];
+  }
+  return { r, resR, resC, base, ph, ln, game, img: new ImageData(resC, resR) };
+}
+function cellText(ctx, p, lt, x, y, cell, v) {
+  const g = SC.games[p], tr = g.trials.find((t) => lt >= t.s && lt < t.s + t.n);
+  if (!tr) return;
+  ctx.fillStyle = (v & 0x30) && (v & 15) < 3 ? '#fff' : '#16181D';   // white text on a fresh flash
+  if (cell / devicePixelRatio >= 44) {   // big cells: problem and the input so far
+    let buf = '';
+    tr.at.forEach((at, j) => { if (at <= lt) buf = tr.keys[j] === '<' ? buf.slice(0, -1) : buf + tr.keys[j]; });
+    ctx.font = `600 ${Math.round(cell * 0.17)}px 'JetBrains Mono', monospace`;
+    ctx.fillText(tr.prob.replace('*', '×').replace('/', '÷').replace('-', '−'), x + cell / 2, y + cell * 0.36);
+    ctx.font = `700 ${Math.round(cell * 0.22)}px 'JetBrains Mono', monospace`;
+    ctx.fillText(buf, x + cell / 2, y + cell * 0.68);
+  } else {            // small cells: the digit just typed, fading with its flash
+    const j = tr.at.findLastIndex((at) => at <= lt && lt - at < FADE);
+    if (j < 0) return;
+    ctx.globalAlpha = 1 - (lt - tr.at[j]) / FADE;
+    ctx.font = `700 ${Math.round(cell * 0.6)}px 'JetBrains Mono', monospace`;
+    ctx.fillText(tr.keys[j] === '<' ? '⌫' : tr.keys[j], x + cell / 2, y + cell * 0.55);
+    ctx.globalAlpha = 1;
+  }
+}
+function drawScale(dt) {
+  const cv = document.getElementById('grid');
+  if (!cv || !SC) return;
+  SC.t += dt;
+  const W = Math.round(cv.clientWidth * devicePixelRatio), H = W / 2;
+  if (cv.width !== W) { cv.width = W; cv.height = H; }
+  const tick = Math.floor(SC.t / TICK);
+  if (SC.tick === tick && SC.L && SC.L.r === S.r && SC.W === W) return;   // states change once per tick
+  const steps = SC.tick == null ? 0 : Math.max(0, tick - SC.tick);
+  SC.tick = tick;
+  const r = S.r, resR = Math.min(r, Math.floor(H));
+  if (!SC.L || SC.L.r !== r || SC.L.resR !== resR) {
+    SC.L = layout(r, resR);
+    document.getElementById('scaleN').innerHTML = scaleNote();
+  }
+  SC.W = W;
+  const L = SC.L, n = L.resR * L.resC, ctx = cv.getContext('2d'), tl = SC.tl, lut = SC.lut;
+  let done = 0;
+  if (r <= 50) {      // one rectangle per game, with gaps
+    const cell = W / L.resC, gap = cell > 6 ? Math.max(1, cell * 0.1) : 0;
+    ctx.clearRect(0, 0, W, H);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (let j = 0; j < n; j++) {
+      const lt = (tick + L.ph[j]) % L.ln[j], v = tl[L.base[j] + lt], x = (j % L.resC) * cell, y = Math.floor(j / L.resC) * cell;
+      if (v & 0x80) done++;
+      ctx.fillStyle = SC.css[v];
+      ctx.fillRect(x + gap / 2, y + gap / 2, cell - gap, cell - gap);
+      if (cell / devicePixelRatio >= 13) cellText(ctx, L.game[j], lt, x, y, cell, v);
+    }
+  } else {            // one pixel per game (or per block of games), scaled to the canvas
+    const px = new Uint32Array(L.img.data.buffer);
+    for (let j = 0; j < n; j++) {
+      const v = tl[L.base[j] + (tick + L.ph[j]) % L.ln[j]];
+      if (v & 0x80) done++;
+      px[j] = lut[v];
+    }
+    const pc = SC.pc && SC.pc.width === L.resC ? SC.pc : (SC.pc = new OffscreenCanvas(L.resC, L.resR));
+    pc.getContext('2d').putImageData(L.img, 0, 0);
+    ctx.imageSmoothingEnabled = L.resC > W;
+    ctx.drawImage(pc, 0, 0, W, H);
+  }
+  // Each drawn pixel stands for its block, so scale answers up by games per pixel.
+  SC.answers += done * steps * (2 * r * r) / n;
+  document.getElementById('answers').textContent = Math.round(SC.answers).toLocaleString('en-US');
+}
+
+/* ============================== TOOLBAR ============================== */
+const DEFAULTS = { add: [47, 38], sub: [38, 47], mul: [7, 46], div: [7, 46] };
+function renderToolbar() {
+  const tabs = [['live', 'Live session'], ['problem', 'By problem'], ['scale', 'All games']].map(([m, l]) =>
+    `<button class="tab${S.mode === m ? ' on' : ''}" role="tab" aria-selected="${S.mode === m}" data-act="tab" data-v="${m}">${l}</button>`).join('');
+  let right;
+  if (S.mode === 'live') {
+    right = sessions().map((s, i) =>
+      `<button class="chip${S.session === i ? ' on' : ''}" data-act="session" data-v="${i}">${s.label}</button>`).join('') +
+      `<button class="chip" data-act="pause" aria-label="${S.paused ? 'Play' : 'Pause'}">${S.paused
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="#16181D" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="#16181D" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>'}</button>`;
+  } else if (S.mode === 'scale') {
+    right = SC ? `<span class="label" id="scaleN">${scaleNote()}</span>
+      <input class="slider" type="range" min="0" max="1000" value="${sliderFromR(S.r)}" aria-label="Number of games">` : '';
+  } else {
+    right = '<span class="label">Operator</span>' + Object.keys(OPS).map((op) =>
+      `<button class="chip op${S.prob && S.prob.op === op ? ' on' : ''}" data-act="op" data-v="${op}" aria-label="${OPS[op].name}">${OPS[op].sym}</button>`).join('');
+  }
+  document.getElementById('toolbar').innerHTML =
+    `<div class="tabs" role="tablist" aria-label="View">${tabs}</div><div class="ctrls">${right}</div>`;
+}
+
+function renderAll() {
+  renderToolbar();
+  if (S.mode === 'live') renderLive(performance.now());
+  else if (S.mode === 'scale') { loadScale(); renderScale(); }
+  else renderProblem();
+}
+
+/* ============================== EVENTS ============================== */
+document.querySelector('.box').addEventListener('click', (e) => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const act = el.dataset.act, v = el.dataset.v, i = Number(el.dataset.i);
+  if (act === 'tab') {
+    S.mode = v;
+    if (v === 'problem' && !S.prob) setProblem('add', 47, 38, null);
+  } else if (act === 'session') { S.session = Number(v); S.t = 0; }
+  else if (act === 'pause') S.paused = !S.paused;
+  else if (act === 'bar') {
+    const b = liveBars[i];
+    S.mode = 'problem';
+    setProblem(b.x.op, b.x.R, b.x.C, b.partial ? null : b.x.rt);
+  } else if (act === 'cell') {
+    const v2 = heatFor(S.prob.op).vals[i];
+    setProblem(S.prob.op, v2.rc, v2.cc, null);
+  } else if (act === 'op') setProblem(v, DEFAULTS[v][0], DEFAULTS[v][1], null);
+  renderAll();
+});
+document.getElementById('toolbar').addEventListener('input', (e) => {
+  if (!e.target.classList.contains('slider')) return;
+  S.r = rFromSlider(Number(e.target.value));
+  SC.answers = 0;
+});
+document.getElementById('citeBtn').addEventListener('click', (e) => {
+  const c = document.getElementById('cite');
+  c.hidden = !c.hidden;
+  e.currentTarget.setAttribute('aria-expanded', String(!c.hidden));
+});
+
+/* ============================== LOOP ============================== */
+let last = performance.now();
+function frame(now) {
+  const dt = Math.max(0, now - last); last = now;   // first rAF timestamp can precede page start
+  if (S.mode === 'live' && !S.paused) { S.t += dt; renderLive(now); }
+  else if (S.mode === 'scale') drawScale(dt);
+  requestAnimationFrame(frame);
+}
+renderAll();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
