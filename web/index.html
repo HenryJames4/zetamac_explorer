@@ -128,7 +128,11 @@
              background: linear-gradient(90deg, #F9D057, #F28C38, #D6456A, #8E2C8C, #3B1C6E); }
   .hint { font-size: 13px; color: var(--muted); }
   .scale-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  #grid, #gridgl { width: 100%; max-width: 860px; aspect-ratio: 2 / 1; display: block; }
+  .grid-row { display: flex; gap: 8px; width: 100%; max-width: 860px; }
+  #grid, #gridgl { flex: 1; min-width: 0; aspect-ratio: 2 / 1; display: block; }
+  .speed { display: flex; align-items: center; gap: 8px; writing-mode: vertical-rl; transform: rotate(180deg);
+           font-size: 11px; font-weight: 600; color: var(--muted); }
+  .speed i { flex: 1; width: 1px; background: linear-gradient(var(--line), var(--muted)); }
   .answers { width: 100%; max-width: 860px; text-align: right; font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
   .answers b { display: inline-block; min-width: 11ch; color: var(--ink); font-variant-numeric: tabular-nums; }
   .slider { width: 200px; accent-color: var(--ink); }
@@ -463,7 +467,7 @@ function buildScale() {
       t += n;
       return tr;
     });
-    return { trials, len: t, keyT: Float64Array.from(keyT), keyC: Uint8Array.from(keyC), keyS, ansT };
+    return { trials, len: t, keyT: Float64Array.from(keyT), keyC: Uint8Array.from(keyC), keyS, ansT, speed: ansT.length / t };
   });
   // Keystroke timeline for the GPU: per 100 ms slot, 1 + ms offset of the latest keystroke, +128 if wrong (0 = none).
   const slotOff = new Uint32Array(games.length);
@@ -477,7 +481,9 @@ function buildScale() {
   }));
   const rate = new Float64Array(games.length + 1);   // cumulative answers per ms
   games.forEach((g, i) => { rate[i + 1] = rate[i] + g.ansT.length / g.len; });
-  SC = { games, slotOff, slots, rate, pool: games.length, rMax: Math.floor(Math.sqrt(ZDATA.scale.total / 2)), t: 0, answers: 0 };
+  // Speed = answers per ms, so games of different lengths and settings compare fairly.
+  const rank = games.map((g, i) => i).sort((a, b) => games[b].speed - games[a].speed);
+  SC = { games, slotOff, slots, rate, rank, pool: games.length, rMax: Math.floor(Math.sqrt(ZDATA.scale.total / 2)), t: 0, answers: 0 };
   if (!S.r) S.r = R_MIN;
 }
 function loadScale() {
@@ -497,7 +503,10 @@ function scaleNote() {
 function renderScale() {
   document.getElementById('body').innerHTML = SC ? `
     <div class="scale-wrap">
-      <canvas id="grid"></canvas><canvas id="gridgl"></canvas>
+      <div class="grid-row">
+        <div class="speed" aria-hidden="true"><span>Slower</span><i></i><span>Faster</span></div>
+        <canvas id="grid"></canvas><canvas id="gridgl"></canvas>
+      </div>
       <div class="answers">Answers: <b id="answers">0</b></div>
     </div>` : '<span class="hint">Loading games…</span>';
 }
@@ -512,15 +521,20 @@ function drawScale(dt) {
   if (crowd) drawCrowd(); else drawSquares();
 }
 
-/* Up to CROWD_R rows: one square per game, flashing on every keystroke. */
+/* Up to CROWD_R rows: one square per game, sorted fastest to slowest, flashing on every keystroke. */
+function orderFor(n) {
+  if (SC.order?.length !== n) SC.order = Array.from({ length: n }, (_, i) => i).sort((a, b) => SC.games[b].speed - SC.games[a].speed);
+  return SC.order;
+}
 function drawSquares() {
   const cv = document.getElementById('grid'), W = Math.round(cv.clientWidth * devicePixelRatio), H = Math.round(W / 2);
   if (cv.width !== W) { cv.width = W; cv.height = H; }
   const ctx = cv.getContext('2d'), cols = 2 * S.r, cell = W / cols, gap = cell > 6 ? Math.max(1, cell * 0.1) : 0;
   ctx.clearRect(0, 0, W, H);
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const order = orderFor(cols * S.r);
   for (let i = 0; i < cols * S.r; i++) {
-    const g = SC.games[i], lt = (SC.t + mix(i, 2)) % g.len;   // each square has its own start offset
+    const g = SC.games[order[i]], lt = (SC.t + mix(i, 2)) % g.len;   // each square has its own start offset
     let lo = 0, hi = g.keyT.length;
     while (lo < hi) { const m = (lo + hi) >> 1; if (g.keyT[m] <= lt) lo = m + 1; else hi = m; }
     const j = lo > 0 ? lo - 1 : g.keyT.length - 1, age = lo > 0 ? lt - g.keyT[j] : lt + g.len - g.keyT[j];
@@ -550,7 +564,7 @@ function cellText(ctx, g, lt, x, y, cell, j, age, f) {
   }
 }
 
-/* Above CROWD_R rows, on the GPU: each pixel shows one random game from its block, flashing on every keystroke. */
+/* Above CROWD_R rows, on the GPU: each row draws its games from the matching slice of the speed-ranked pool. */
 const CROWD_FS = `#version 300 es
 precision highp float; precision highp int; precision highp usampler2D;
 uniform usampler2D uSlots, uGames;
@@ -562,7 +576,8 @@ uniform vec3 uIdle, uOk, uErr;
 out vec4 color;
 uint mix32(uint i, uint k) { uint h = (i ^ k) * 2654435761u; h ^= h >> 15; return h * 2246822519u; }
 vec2 age(uint i) {   // ms since the last keystroke, and 1 if it was wrong
-  uint p = i < uPool ? i : mix32(i, 1u) % uPool;
+  float q = (float(i / uint(uCols)) + float(mix32(i, 1u) >> 8) / 16777216.0) / float(uRows);
+  uint p = min(uint(q * float(uPool)), uPool - 1u);   // rank in the pool, fastest first
   uvec2 g = texelFetch(uGames, ivec2(int(p % 128u), int(p / 128u)), 0).rg;   // slot offset, length (ms)
   uint lt = (uT % g.y + mix32(i, 2u) % g.y) % g.y;
   float ltf = float(lt) + uTf;
@@ -615,7 +630,7 @@ function initGL(cv) {
   gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
   texture(0, gl.R8UI, gl.RED_INTEGER, gl.UNSIGNED_BYTE, 4096, SC.slots.length / 4096, SC.slots);
   const gh = Math.ceil(SC.pool / 128), table = new Uint32Array(128 * gh * 2);
-  SC.games.forEach((g, i) => { table[2 * i] = SC.slotOff[i]; table[2 * i + 1] = g.len; });
+  SC.rank.forEach((p, k) => { table[2 * k] = SC.slotOff[p]; table[2 * k + 1] = SC.games[p].len; });
   texture(1, gl.RG32UI, gl.RG_INTEGER, gl.UNSIGNED_INT, 128, gh, table);
   const u = {};
   ['uSlots', 'uGames', 'uT', 'uPool', 'uTf', 'uRows', 'uCols', 'uRes', 'uIdle', 'uOk', 'uErr'].forEach((k) => { u[k] = gl.getUniformLocation(prog, k); });
