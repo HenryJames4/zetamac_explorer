@@ -30,8 +30,9 @@
   .page { max-width: 1000px; margin: 0 auto; padding: 20px 20px 32px; display: flex; flex-direction: column; gap: 16px; }
 
   header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; }
+  h1 .logo { height: 1em; width: 1em; flex: none; }
   .titles { display: flex; flex-direction: column; gap: 4px; }
-  h1 { margin: 0; font-family: var(--mono); font-size: 36px; line-height: 1; letter-spacing: -0.03em; }
+  h1 { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--mono); font-size: 36px; line-height: 1; letter-spacing: -0.03em; }
   .sub { margin: 0; font-size: 15px; line-height: 1.4; color: var(--ink-2); max-width: 380px; }
   nav { display: flex; flex-wrap: wrap; gap: 4px 20px; }
   .link { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0; border: 0; background: none;
@@ -127,7 +128,7 @@
              background: linear-gradient(90deg, #F9D057, #F28C38, #D6456A, #8E2C8C, #3B1C6E); }
   .hint { font-size: 13px; color: var(--muted); }
   .scale-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  #grid { width: 100%; max-width: 860px; aspect-ratio: 2 / 1; display: block; }
+  #grid, #gridgl { width: 100%; max-width: 860px; aspect-ratio: 2 / 1; display: block; }
   .answers { width: 100%; max-width: 860px; text-align: right; font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
   .answers b { display: inline-block; min-width: 11ch; color: var(--ink); font-variant-numeric: tabular-nums; }
   .slider { width: 200px; accent-color: var(--ink); }
@@ -162,7 +163,7 @@
 <div class="page">
   <header>
     <div class="titles">
-    <h1>Zetamac</h1>
+    <h1><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><rect x="0" y="0" width="14" height="14" rx="3" fill="#5DC184"/><rect x="21.2" y="0" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="42.4" y="0" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="0" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="84.8" y="0" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="0" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="0" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="21.2" y="21.2" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="42.4" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="63.6" y="21.2" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="84.8" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="106" y="21.2" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="0" y="42.4" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="21.2" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="42.4" y="42.4" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="63.6" y="42.4" width="14" height="14" rx="3" fill="#5DC184"/><rect x="84.8" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="0" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="21.2" y="63.6" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="42.4" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="63.6" width="14" height="14" rx="3" fill="#D9443B"/><rect x="84.8" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="63.6" width="14" height="14" rx="3" fill="#5DC184"/><rect x="0" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="21.2" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="42.4" y="84.8" width="14" height="14" rx="3" fill="#5DC184"/><rect x="63.6" y="84.8" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="84.8" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="106" y="84.8" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="0" y="106" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="21.2" y="106" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="42.4" y="106" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="106" width="14" height="14" rx="3" fill="#D9443B"/><rect x="84.8" y="106" width="14" height="14" rx="3" fill="#D9443B"/><rect x="106" y="106" width="14" height="14" rx="3" fill="#5DC184"/></svg>Zetamac</h1>
     <p class="sub">Mental arithmetic across 300+ million trials<br>and 7 million sessions.</p>
     </div>
     <nav aria-label="Resources">
@@ -436,53 +437,47 @@ function renderHist() {
 }
 
 /* ============================== ALL GAMES VIEW ============================== */
-const TICK = 100, FADE = 6;     // timeline step (ms) and flash-and-fade length (steps)
-const R_MIN = 7;                // grid is 2r x r games; r = 7 gives 98
+const R_MIN = 7, CROWD_R = 50;   // grid is 2r x r games; above CROWD_R rows it is drawn on the GPU
+const FADE = 600, SLOT = 100;    // flash fade (ms); keystroke timeline slot on the GPU (ms)
 const IDLE = [228, 230, 234], VIVID = [null, [46, 112, 49], [163, 58, 53]];   // --key and --err
-let SC = null;                  // pool of real games; timeline byte = colour << 4 | fade step, 0x80 = answer
+let SC = null;
 function answerOf(p) {
   const [, a, op, b] = p.match(/(\d+)([-+*/])(\d+)/), x = +a, y = +b;
   return String(op === '+' ? x + y : op === '-' ? x - y : op === '*' ? x * y : x / y);
 }
 function buildScale() {
   const games = ZDATA.scale.games.map((g) => {
-    let t = 0;
+    let t = 0, keyS = '';
+    const keyT = [], keyC = [], ansT = [];
     const trials = g.split(',').map((str) => {
-      const [rt, prob, keys] = str.split(':'), tr = { s: t, n: +rt, prob, keys, ans: answerOf(prob) };
-      t += tr.n;
+      const [rt, prob, keys] = str.split(':'), n = rt * 100, tr = { s: t, n, prob, keys, ans: answerOf(prob), at: [] };
+      let buf = '';
+      // Keystrokes spread evenly across the trial, as in the live view.
+      [...keys].forEach((ch, j) => {
+        buf = ch === '<' ? buf.slice(0, -1) : buf + ch;
+        const at = t + (j + 1) * n / keys.length;
+        tr.at.push(at); keyT.push(at); keyC.push(ch !== '<' && tr.ans.startsWith(buf) ? 1 : 2);
+      });
+      keyS += keys;
+      ansT.push(t + n);
+      t += n;
       return tr;
     });
-    return { trials, len: t };
+    return { trials, len: t, keyT: Float64Array.from(keyT), keyC: Uint8Array.from(keyC), keyS, ansT };
   });
-  const off = new Int32Array(games.length), len = Int32Array.from(games, (g) => g.len);
+  // Keystroke timeline for the GPU: per 100 ms slot, 1 + ms offset of the latest keystroke, +128 if wrong (0 = none).
+  const slotOff = new Uint32Array(games.length);
   let total = 0;
-  games.forEach((g, i) => { off[i] = total; total += g.len; });
-  const tl = new Uint8Array(total);
-  games.forEach((g, i) => g.trials.forEach((tr) => {
-    let buf = '';
-    // Keystrokes spread evenly across the trial, as in the live view.
-    tr.at = [...tr.keys].map((ch, j) => {
-      buf = ch === '<' ? buf.slice(0, -1) : buf + ch;
-      const col = ch !== '<' && tr.ans.startsWith(buf) ? 1 : 2;
-      const at = Math.max(tr.s, Math.floor(tr.s + (j + 1) * tr.n / tr.keys.length) - 1);
-      for (let f = 0; f < FADE; f++) {
-        const x = off[i] + (at + f) % g.len, e = tl[x] & 0x7F;
-        if (!e || f < (e & 15) || (f === (e & 15) && col === 2)) tl[x] = (tl[x] & 0x80) | (col << 4) | f;
-      }
-      return at;
-    });
-    tl[off[i] + tr.at[tr.at.length - 1]] |= 0x80;
+  games.forEach((g, i) => { slotOff[i] = total; total += Math.ceil(g.len / SLOT); });
+  const slots = new Uint8Array(Math.ceil(total / 4096) * 4096);
+  games.forEach((g, i) => g.keyT.forEach((t, j) => {
+    t %= g.len;
+    const k = slotOff[i] + Math.floor(t / SLOT), v = Math.floor(t % SLOT) + 1;
+    if (v >= (slots[k] & 127)) slots[k] = v | (g.keyC[j] === 2 ? 128 : 0);
   }));
-  // Colour lookup for every timeline byte: vivid on the keystroke, fading back to idle.
-  const lut = new Uint32Array(256), css = [];
-  for (let v = 0; v < 256; v++) {
-    const col = (v >> 4) & 3, f = v & 15;
-    const c = col === 1 || col === 2 ? VIVID[col].map((x, j) => Math.round(x + (IDLE[j] - x) * Math.min(1, f / FADE) ** 1.5)) : IDLE;
-    lut[v] = 0xFF000000 | (c[2] << 16) | (c[1] << 8) | c[0];
-    css[v] = `rgb(${c.join(',')})`;
-  }
-  const rMax = Math.floor(Math.sqrt(ZDATA.scale.total / 2));
-  SC = { games, tl, off, len, lut, css, pool: games.length, rMax, t: 0, answers: 0 };
+  const rate = new Float64Array(games.length + 1);   // cumulative answers per ms
+  games.forEach((g, i) => { rate[i + 1] = rate[i] + g.ansT.length / g.len; });
+  SC = { games, slotOff, slots, rate, pool: games.length, rMax: Math.floor(Math.sqrt(ZDATA.scale.total / 2)), t: 0, answers: 0 };
   if (!S.r) S.r = R_MIN;
 }
 function loadScale() {
@@ -502,87 +497,143 @@ function scaleNote() {
 function renderScale() {
   document.getElementById('body').innerHTML = SC ? `
     <div class="scale-wrap">
-      <canvas id="grid"></canvas>
+      <canvas id="grid"></canvas><canvas id="gridgl"></canvas>
       <div class="answers">Answers: <b id="answers">0</b></div>
     </div>` : '<span class="hint">Loading games…</span>';
 }
-/* Per-pixel game index, start offset and loop length; rebuilt when the grid or canvas changes. */
-function layout(r, resR) {
-  const cols = 2 * r, resC = 2 * resR, b = r / resR, n = resR * resC;
-  const base = new Int32Array(n), ph = new Int32Array(n), ln = new Int32Array(n), game = new Int32Array(n);
-  for (let y = 0; y < resR; y++) for (let x = 0; x < resC; x++) {
-    const j = y * resC + x;
-    const gy = Math.floor(y * b) + (b > 1 ? mix(j, 3) % Math.floor(b) : 0);
-    const gx = Math.floor(x * b) + (b > 1 ? mix(j, 4) % Math.floor(b) : 0);
-    const i = gy * cols + gx, p = i < SC.pool ? i : mix(i, 1) % SC.pool;
-    game[j] = p; base[j] = SC.off[p]; ln[j] = SC.len[p]; ph[j] = mix(i, 2) % ln[j];
-  }
-  return { r, resR, resC, base, ph, ln, game, img: new ImageData(resC, resR) };
+function drawScale(dt) {
+  if (!SC || !document.getElementById('grid')) return;
+  SC.t += dt;
+  const n = 2 * S.r * S.r, crowd = S.r > CROWD_R;
+  SC.answers += dt * (n <= SC.pool ? SC.rate[n] : n * SC.rate[SC.pool] / SC.pool);
+  document.getElementById('answers').textContent = Math.round(SC.answers).toLocaleString('en-US');
+  document.getElementById('grid').style.display = crowd ? 'none' : 'block';
+  document.getElementById('gridgl').style.display = crowd ? 'block' : 'none';
+  if (crowd) drawCrowd(); else drawSquares();
 }
-function cellText(ctx, p, lt, x, y, cell, v) {
-  const g = SC.games[p], tr = g.trials.find((t) => lt >= t.s && lt < t.s + t.n);
-  if (!tr) return;
-  ctx.fillStyle = (v & 0x30) && (v & 15) < 3 ? '#fff' : '#16181D';   // white text on a fresh flash
-  if (cell / devicePixelRatio >= 44) {   // big cells: problem and the input so far
+
+/* Up to CROWD_R rows: one square per game, flashing on every keystroke. */
+function drawSquares() {
+  const cv = document.getElementById('grid'), W = Math.round(cv.clientWidth * devicePixelRatio), H = Math.round(W / 2);
+  if (cv.width !== W) { cv.width = W; cv.height = H; }
+  const ctx = cv.getContext('2d'), cols = 2 * S.r, cell = W / cols, gap = cell > 6 ? Math.max(1, cell * 0.1) : 0;
+  ctx.clearRect(0, 0, W, H);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (let i = 0; i < cols * S.r; i++) {
+    const g = SC.games[i], lt = (SC.t + mix(i, 2)) % g.len;   // each square has its own start offset
+    let lo = 0, hi = g.keyT.length;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (g.keyT[m] <= lt) lo = m + 1; else hi = m; }
+    const j = lo > 0 ? lo - 1 : g.keyT.length - 1, age = lo > 0 ? lt - g.keyT[j] : lt + g.len - g.keyT[j];
+    const f = age < FADE ? (1 - age / FADE) ** 1.5 : 0, c = VIVID[g.keyC[j]];
+    ctx.fillStyle = `rgb(${IDLE.map((x, k) => Math.round(x + (c[k] - x) * f))})`;
+    const x = (i % cols) * cell, y = Math.floor(i / cols) * cell;
+    ctx.fillRect(x + gap / 2, y + gap / 2, cell - gap, cell - gap);
+    if (cell / devicePixelRatio >= 13) cellText(ctx, g, lt, x, y, cell, j, age, f);
+  }
+}
+function cellText(ctx, g, lt, x, y, cell, j, age, f) {
+  ctx.fillStyle = f > 0.5 ? '#fff' : '#16181D';   // white text on a fresh flash
+  if (cell / devicePixelRatio >= 44) {            // big cells: problem and the input so far
+    const tr = g.trials.find((t) => lt >= t.s && lt < t.s + t.n);
+    if (!tr) return;
     let buf = '';
-    tr.at.forEach((at, j) => { if (at <= lt) buf = tr.keys[j] === '<' ? buf.slice(0, -1) : buf + tr.keys[j]; });
+    tr.at.forEach((at, k) => { if (at <= lt) buf = tr.keys[k] === '<' ? buf.slice(0, -1) : buf + tr.keys[k]; });
     ctx.font = `600 ${Math.round(cell * 0.17)}px 'JetBrains Mono', monospace`;
     ctx.fillText(tr.prob.replace('*', '×').replace('/', '÷').replace('-', '−'), x + cell / 2, y + cell * 0.36);
     ctx.font = `700 ${Math.round(cell * 0.22)}px 'JetBrains Mono', monospace`;
     ctx.fillText(buf, x + cell / 2, y + cell * 0.68);
-  } else {            // small cells: the digit just typed, fading with its flash
-    const j = tr.at.findLastIndex((at) => at <= lt && lt - at < FADE);
-    if (j < 0) return;
-    ctx.globalAlpha = 1 - (lt - tr.at[j]) / FADE;
+  } else if (age < FADE) {                        // small cells: the digit just typed, fading with its flash
+    ctx.globalAlpha = 1 - age / FADE;
     ctx.font = `700 ${Math.round(cell * 0.6)}px 'JetBrains Mono', monospace`;
-    ctx.fillText(tr.keys[j] === '<' ? '⌫' : tr.keys[j], x + cell / 2, y + cell * 0.55);
+    ctx.fillText(g.keyS[j] === '<' ? '⌫' : g.keyS[j], x + cell / 2, y + cell * 0.55);
     ctx.globalAlpha = 1;
   }
 }
-function drawScale(dt) {
-  const cv = document.getElementById('grid');
-  if (!cv || !SC) return;
-  SC.t += dt;
-  const W = Math.round(cv.clientWidth * devicePixelRatio), H = W / 2;
+
+/* Above CROWD_R rows, on the GPU: each pixel shows one random game from its block, flashing on every keystroke. */
+const CROWD_FS = `#version 300 es
+precision highp float; precision highp int; precision highp usampler2D;
+uniform usampler2D uSlots, uGames;
+uniform uint uT, uPool;
+uniform float uTf;
+uniform int uRows, uCols;
+uniform vec2 uRes;
+uniform vec3 uIdle, uOk, uErr;
+out vec4 color;
+uint mix32(uint i, uint k) { uint h = (i ^ k) * 2654435761u; h ^= h >> 15; return h * 2246822519u; }
+vec2 age(uint i) {   // ms since the last keystroke, and 1 if it was wrong
+  uint p = i < uPool ? i : mix32(i, 1u) % uPool;
+  uvec2 g = texelFetch(uGames, ivec2(int(p % 128u), int(p / 128u)), 0).rg;   // slot offset, length (ms)
+  uint lt = (uT % g.y + mix32(i, 2u) % g.y) % g.y;
+  float ltf = float(lt) + uTf;
+  int s = int(lt / ${SLOT}u), n = int((g.y + ${SLOT - 1}u) / ${SLOT}u);
+  for (int k = 0; k <= ${Math.ceil(FADE / SLOT)}; k++) {
+    int sk = s - k;
+    float wrap = 0.0;
+    if (sk < 0) { sk += n; wrap = float(g.y); }
+    uint idx = g.x + uint(sk);
+    uint v = texelFetch(uSlots, ivec2(int(idx % 4096u), int(idx / 4096u)), 0).r;
+    if (v > 0u) { float a = ltf + wrap - float(uint(sk) * ${SLOT}u + (v & 127u) - 1u); if (a >= 0.0) return vec2(a, float(v >> 7)); }
+  }
+  return vec2(1e9, 0.0);
+}
+void main() {
+  vec2 px = vec2(gl_FragCoord.x - 0.5, uRes.y - gl_FragCoord.y - 0.5);
+  float by = float(uRows) / uRes.y, bx = float(uCols) / uRes.x;
+  uint j = uint(int(px.y) * int(uRes.x) + int(px.x));
+  int y = int(px.y * by) + (by > 1.0 ? int(mix32(j, 3u) % uint(by)) : 0);
+  int x = int(px.x * bx) + (bx > 1.0 ? int(mix32(j, 4u) % uint(bx)) : 0);
+  vec2 a = age(uint(min(y, uRows - 1) * uCols + min(x, uCols - 1)));
+  float f = a.x < ${FADE}.0 ? pow(1.0 - a.x / ${FADE}.0, 1.5) : 0.0;
+  color = vec4(mix(uIdle, a.y > 0.5 ? uErr : uOk, f) / 255.0, 1.0);
+}`;
+function initGL(cv) {
+  const gl = cv.getContext('webgl2');
+  if (!gl) return null;
+  const shader = (type, src) => {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src); gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+    return sh;
+  };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, shader(gl.VERTEX_SHADER, '#version 300 es\nin vec2 p;\nvoid main() { gl_Position = vec4(p, 0.0, 1.0); }'));
+  gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, CROWD_FS));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  const texture = (unit, ifmt, fmt, type, w, h, data) => {
+    gl.activeTexture(gl.TEXTURE0 + unit);
+    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texImage2D(gl.TEXTURE_2D, 0, ifmt, w, h, 0, fmt, type, data);
+  };
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  texture(0, gl.R8UI, gl.RED_INTEGER, gl.UNSIGNED_BYTE, 4096, SC.slots.length / 4096, SC.slots);
+  const gh = Math.ceil(SC.pool / 128), table = new Uint32Array(128 * gh * 2);
+  SC.games.forEach((g, i) => { table[2 * i] = SC.slotOff[i]; table[2 * i + 1] = g.len; });
+  texture(1, gl.RG32UI, gl.RG_INTEGER, gl.UNSIGNED_INT, 128, gh, table);
+  const u = {};
+  ['uSlots', 'uGames', 'uT', 'uPool', 'uTf', 'uRows', 'uCols', 'uRes', 'uIdle', 'uOk', 'uErr'].forEach((k) => { u[k] = gl.getUniformLocation(prog, k); });
+  gl.uniform1i(u.uSlots, 0); gl.uniform1i(u.uGames, 1);
+  gl.uniform1ui(u.uPool, SC.pool);
+  gl.uniform3fv(u.uIdle, IDLE); gl.uniform3fv(u.uOk, VIVID[1]); gl.uniform3fv(u.uErr, VIVID[2]);
+  return { gl, u, cv };
+}
+function drawCrowd() {
+  const cv = document.getElementById('gridgl');
+  if (!SC.gl || SC.gl.cv !== cv) SC.gl = initGL(cv);   // the canvas is recreated when the view re-renders
+  if (!SC.gl) return;
+  const W = Math.round(cv.clientWidth * devicePixelRatio), H = Math.round(W / 2), { gl, u } = SC.gl;
   if (cv.width !== W) { cv.width = W; cv.height = H; }
-  const tick = Math.floor(SC.t / TICK);
-  if (SC.tick === tick && SC.L && SC.L.r === S.r && SC.W === W) return;   // states change once per tick
-  const steps = SC.tick == null ? 0 : Math.max(0, tick - SC.tick);
-  SC.tick = tick;
-  const r = S.r, resR = Math.min(r, Math.floor(H));
-  if (!SC.L || SC.L.r !== r || SC.L.resR !== resR) {
-    SC.L = layout(r, resR);
-    document.getElementById('scaleN').innerHTML = scaleNote();
-  }
-  SC.W = W;
-  const L = SC.L, n = L.resR * L.resC, ctx = cv.getContext('2d'), tl = SC.tl, lut = SC.lut;
-  let done = 0;
-  if (r <= 50) {      // one rectangle per game, with gaps
-    const cell = W / L.resC, gap = cell > 6 ? Math.max(1, cell * 0.1) : 0;
-    ctx.clearRect(0, 0, W, H);
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    for (let j = 0; j < n; j++) {
-      const lt = (tick + L.ph[j]) % L.ln[j], v = tl[L.base[j] + lt], x = (j % L.resC) * cell, y = Math.floor(j / L.resC) * cell;
-      if (v & 0x80) done++;
-      ctx.fillStyle = SC.css[v];
-      ctx.fillRect(x + gap / 2, y + gap / 2, cell - gap, cell - gap);
-      if (cell / devicePixelRatio >= 13) cellText(ctx, L.game[j], lt, x, y, cell, v);
-    }
-  } else {            // one pixel per game (or per block of games), scaled to the canvas
-    const px = new Uint32Array(L.img.data.buffer);
-    for (let j = 0; j < n; j++) {
-      const v = tl[L.base[j] + (tick + L.ph[j]) % L.ln[j]];
-      if (v & 0x80) done++;
-      px[j] = lut[v];
-    }
-    const pc = SC.pc && SC.pc.width === L.resC ? SC.pc : (SC.pc = new OffscreenCanvas(L.resC, L.resR));
-    pc.getContext('2d').putImageData(L.img, 0, 0);
-    ctx.imageSmoothingEnabled = L.resC > W;
-    ctx.drawImage(pc, 0, 0, W, H);
-  }
-  // Each drawn pixel stands for its block, so scale answers up by games per pixel.
-  SC.answers += done * steps * (2 * r * r) / n;
-  document.getElementById('answers').textContent = Math.round(SC.answers).toLocaleString('en-US');
+  gl.viewport(0, 0, W, H);
+  gl.uniform1ui(u.uT, Math.floor(SC.t) >>> 0); gl.uniform1f(u.uTf, SC.t % 1);
+  gl.uniform1i(u.uRows, S.r); gl.uniform1i(u.uCols, 2 * S.r); gl.uniform2f(u.uRes, W, H);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
 /* ============================== TOOLBAR ============================== */
@@ -639,6 +690,7 @@ document.getElementById('toolbar').addEventListener('input', (e) => {
   if (!e.target.classList.contains('slider')) return;
   S.r = rFromSlider(Number(e.target.value));
   SC.answers = 0;
+  document.getElementById('scaleN').innerHTML = scaleNote();
 });
 document.getElementById('citeBtn').addEventListener('click', (e) => {
   const c = document.getElementById('cite');
