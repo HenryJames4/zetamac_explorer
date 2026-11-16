@@ -489,7 +489,7 @@ function buildScale() {
 function loadScale() {
   if (SC || document.getElementById('scaleData')) return;
   const s = document.createElement('script');
-  s.id = 'scaleData'; s.src = 'data/scale.js';
+  s.id = 'scaleData'; s.src = 'data/scale.js?v=2';   // bump when scale.js is regenerated
   s.onload = () => { buildScale(); renderAll(); };
   document.head.appendChild(s);
 }

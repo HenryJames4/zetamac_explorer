@@ -171,6 +171,9 @@ def export_scale(n_shards: int = 60, per_shard: int = 250, n_games: int = 10_000
             trials = []
             for t in (rows[j] or [])[:-1]:   # last trial is the unfinished one at time-out
                 ms, prob = t["timeMs"], re.fullmatch(r"\s*(\d{1,4})\s*([-+*/])\s*(\d{1,4})\s*", t["problem"] or "")
+                if prob and 0 in (int(prob[1]), int(prob[3])):   # custom ranges with 0 (x0, +0): skip the whole game
+                    trials = []
+                    break
                 if ms is None or not THRESHOLD_MS < ms <= MAX_TRIAL_MS or prob is None or not t["entry"]:
                     continue
                 keys = encode_keys(t["entry"])
