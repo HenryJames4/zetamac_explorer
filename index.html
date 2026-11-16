@@ -131,6 +131,29 @@
   .answers { width: 100%; max-width: 860px; text-align: right; font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
   .answers b { display: inline-block; min-width: 11ch; color: var(--ink); font-variant-numeric: tabular-nums; }
   .slider { width: 200px; accent-color: var(--ink); }
+  @media (max-width: 560px) {
+    .page { padding: 16px 12px 24px; gap: 12px; }
+    nav { gap: 2px 14px; }
+    .toolbar { padding: 8px 10px; gap: 8px; }
+    .tabs { width: 100%; }
+    .tab { flex: 1 1 0; height: 36px; padding: 0 6px; font-size: 13px; white-space: nowrap; }
+    .chip { height: 36px; padding: 0 10px; font-size: 13px; }
+    .chip.op { width: 40px; }
+    .body { padding: 12px; gap: 12px; }
+    .game-bar { padding: 8px 12px; font-size: 13px; }
+    .stage { height: 76px; font-size: 24px; }
+    .stage .prob { gap: 8px; white-space: nowrap; }
+    .input { min-width: 72px; height: 42px; padding: 0 8px; }
+    .caret { height: 22px; }
+    .over { font-size: 18px; }
+    .legend { gap: 10px; font-size: 12px; }
+    .yaxis { flex-basis: 46px; }
+    .bars { gap: 4px; }
+    .bar { flex-basis: 38px; }
+    .stack { width: 30px; }
+    .p-title { font-size: 30px; }
+    .stat b { font-size: 18px; }
+  }
   footer { display: flex; justify-content: center; }
   .badge { font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: #FDF0D5; color: #7A4E00; }
 </style>
