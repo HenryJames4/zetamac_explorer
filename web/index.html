@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Zetamac</title>
+<title>Zetamac Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
 <!--
@@ -38,7 +38,8 @@
   .link { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0; border: 0; background: none;
           color: var(--ink-2); font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; }
   .link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-  .link.play { color: var(--accent); font-weight: 600; }
+  .link.play { color: var(--accent); font-weight: 600; padding: 0 12px; border-radius: 8px; background: rgba(36,87,214,.09); }
+  .link.play:hover { background: rgba(36,87,214,.15); text-decoration: none; }
   .cite { margin: 4px 0 0; text-align: left; font-family: var(--mono); font-size: 13px; line-height: 1.6; background: #fff;
           border: 1px solid #D5D7DC; border-radius: 12px; padding: 16px 20px; color: var(--ink-2); white-space: pre-wrap;
           width: 100%; }
@@ -137,6 +138,7 @@
   .answers b { display: inline-block; min-width: 11ch; color: var(--ink); font-variant-numeric: tabular-nums; }
   .slider { width: 200px; accent-color: var(--ink); }
   @media (max-width: 560px) {
+    h1 { font-size: 28px; }
     .page { padding: 16px 12px 24px; gap: 12px; }
     nav { gap: 2px 14px; }
     .toolbar { padding: 8px 10px; gap: 8px; }
@@ -167,7 +169,7 @@
 <div class="page">
   <header>
     <div class="titles">
-    <h1><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><rect x="0" y="0" width="14" height="14" rx="3" fill="#5DC184"/><rect x="21.2" y="0" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="42.4" y="0" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="0" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="84.8" y="0" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="0" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="0" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="21.2" y="21.2" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="42.4" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="63.6" y="21.2" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="84.8" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="106" y="21.2" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="0" y="42.4" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="21.2" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="42.4" y="42.4" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="63.6" y="42.4" width="14" height="14" rx="3" fill="#5DC184"/><rect x="84.8" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="0" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="21.2" y="63.6" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="42.4" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="63.6" width="14" height="14" rx="3" fill="#D9443B"/><rect x="84.8" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="63.6" width="14" height="14" rx="3" fill="#5DC184"/><rect x="0" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="21.2" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="42.4" y="84.8" width="14" height="14" rx="3" fill="#5DC184"/><rect x="63.6" y="84.8" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="84.8" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="106" y="84.8" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="0" y="106" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="21.2" y="106" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="42.4" y="106" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="106" width="14" height="14" rx="3" fill="#D9443B"/><rect x="84.8" y="106" width="14" height="14" rx="3" fill="#D9443B"/><rect x="106" y="106" width="14" height="14" rx="3" fill="#5DC184"/></svg>Zetamac</h1>
+    <h1><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><rect x="0" y="0" width="14" height="14" rx="3" fill="#5DC184"/><rect x="21.2" y="0" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="42.4" y="0" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="0" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="84.8" y="0" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="0" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="0" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="21.2" y="21.2" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="42.4" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="63.6" y="21.2" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="84.8" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="106" y="21.2" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="0" y="42.4" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="21.2" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="42.4" y="42.4" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="63.6" y="42.4" width="14" height="14" rx="3" fill="#5DC184"/><rect x="84.8" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="0" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="21.2" y="63.6" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="42.4" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="63.6" width="14" height="14" rx="3" fill="#D9443B"/><rect x="84.8" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="63.6" width="14" height="14" rx="3" fill="#5DC184"/><rect x="0" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="21.2" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="42.4" y="84.8" width="14" height="14" rx="3" fill="#5DC184"/><rect x="63.6" y="84.8" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="84.8" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="106" y="84.8" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="0" y="106" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="21.2" y="106" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="42.4" y="106" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="106" width="14" height="14" rx="3" fill="#D9443B"/><rect x="84.8" y="106" width="14" height="14" rx="3" fill="#D9443B"/><rect x="106" y="106" width="14" height="14" rx="3" fill="#5DC184"/></svg>Zetamac Explorer</h1>
     <p class="sub">Mental arithmetic across 300+ million trials<br>and 7 million sessions.</p>
     </div>
     <nav aria-label="Resources">
