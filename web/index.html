@@ -9,6 +9,7 @@
 <!--
   Zetamac data explorer. Data in data/*.js is built by pipeline/site_data.py.
 -->
+<script>document.documentElement.dataset.theme = localStorage.getItem('theme') || 'light';</script>
 <script>window.ZDATA = {};</script>
 <script src="data/add.js"></script>
 <script src="data/sub.js"></script>
@@ -20,9 +21,26 @@
     --ink: #16181D; --ink-2: #3F4652; --muted: #4A505C;
     --line: #E2E4E8; --line-2: #ECEDF0; --soft: #F3F4F6; --bg: #F6F6F3;
     --accent: #2457D6; --key: #2E7031; --err: #A33A35; --think: #C9CDD4;
-    --you: #0E9488;
+    --you: #0E9488; --you-ink: #0B6F66;
+    --surface: #fff; --surface-2: #FAFAF8; --stage: #F1F2F4; --tabs: #EEEFF2; --border: #D5D7DC;
+    --accent-soft: rgba(36,87,214,.09); --accent-soft-2: rgba(36,87,214,.15);
+    --wrong-ink: #B42318; --wrong-bg: #FDE7E5;
     --mono: 'JetBrains Mono', ui-monospace, monospace;
   }
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --ink: #E8EAEE; --ink-2: #B4BAC6; --muted: #8C93A1;
+    --line: #262C38; --line-2: #20252F; --soft: #1C212C; --bg: #0B0D11;
+    --accent: #7AA2FF; --key: #2E9F55; --err: #E0574F; --think: #3A4150;
+    --you: #2DD4BF; --you-ink: #5EEAD4;
+    --surface: #141820; --surface-2: #181C25; --stage: #1C212C; --tabs: #1C212C; --border: #2E3543;
+    --accent-soft: rgba(122,162,255,.12); --accent-soft-2: rgba(122,162,255,.2);
+    --wrong-ink: #FF8A80; --wrong-bg: rgba(242,100,92,.16);
+  }
+  [data-theme="dark"] .box { box-shadow: none; }
+  [data-theme="dark"] .tab.on { background: #2A303D; }   /* selected tab lighter than the track in dark mode */
+  [data-theme="dark"] .logo.light, [data-theme="light"] .logo.dark, .theme .sun, [data-theme="dark"] .theme .moon { display: none; }
+  [data-theme="dark"] .theme .sun { display: inline; }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Instrument Sans', system-ui, sans-serif; }
   button { font: inherit; color: inherit; }
@@ -32,31 +50,31 @@
   header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; }
   h1 .logo { height: 1em; width: 1em; flex: none; }
   .titles { display: flex; flex-direction: column; gap: 4px; }
-  h1 { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--mono); font-size: 36px; line-height: 1; letter-spacing: -0.03em; }
+  h1 { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--mono); font-size: 36px; line-height: 1; letter-spacing: -0.03em; word-spacing: -0.25em; }
   .sub { margin: 0; font-size: 15px; line-height: 1.4; color: var(--ink-2); max-width: 380px; }
   nav { display: flex; flex-wrap: wrap; gap: 4px 20px; }
   .link { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0; border: 0; background: none;
           color: var(--ink-2); font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; }
   .link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-  .link.play { color: var(--accent); font-weight: 600; padding: 0 12px; border-radius: 8px; background: rgba(36,87,214,.09); }
-  .link.play:hover { background: rgba(36,87,214,.15); text-decoration: none; }
-  .cite { margin: 4px 0 0; text-align: left; font-family: var(--mono); font-size: 13px; line-height: 1.6; background: #fff;
-          border: 1px solid #D5D7DC; border-radius: 12px; padding: 16px 20px; color: var(--ink-2); white-space: pre-wrap;
+  .link.play { color: var(--accent); font-weight: 600; padding: 0 12px; border-radius: 8px; background: var(--accent-soft); }
+  .link.play:hover { background: var(--accent-soft-2); text-decoration: none; }
+  .cite { margin: 4px 0 0; text-align: left; font-family: var(--mono); font-size: 13px; line-height: 1.6; background: var(--surface);
+          border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; color: var(--ink-2); white-space: pre-wrap;
           width: 100%; }
   .cite[hidden] { display: none; }
 
-  .box { background: #fff; border: 1px solid var(--line); border-radius: 20px; overflow: hidden;
+  .box { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden;
          box-shadow: 0 1px 2px rgba(22,24,29,.05), 0 12px 32px rgba(22,24,29,.06); }
   .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
-             padding: 10px 16px; border-bottom: 1px solid var(--line-2); background: #FAFAF8; }
-  .tabs { display: flex; gap: 4px; background: #EEEFF2; padding: 4px; border-radius: 12px; }
+             padding: 10px 16px; border-bottom: 1px solid var(--line-2); background: var(--surface-2); }
+  .tabs { display: flex; gap: 4px; background: var(--tabs); padding: 4px; border-radius: 12px; }
   .tab { height: 40px; padding: 0 16px; border-radius: 9px; border: 0; background: transparent; color: var(--muted);
          font-size: 14px; font-weight: 600; cursor: pointer; }
-  .tab.on { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(22,24,29,.12); }
+  .tab.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(22,24,29,.12); }
   .ctrls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .chip { height: 40px; min-width: 44px; padding: 0 14px; border-radius: 9px; border: 1px solid #D5D7DC; background: #fff;
+  .chip { height: 40px; min-width: 44px; padding: 0 14px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface);
           font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-  .chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .chip.on { background: var(--ink); border-color: var(--ink); color: var(--surface); }
   .chip.op { font-family: var(--mono); font-size: 18px; padding: 0; width: 44px; }
   .label { font-size: 13px; color: var(--muted); margin-right: 4px; }
   .body { padding: 16px 24px 20px; display: flex; flex-direction: column; gap: 14px; }
@@ -64,15 +82,15 @@
   /* Live session */
   .game { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
   .game-bar { display: flex; justify-content: space-between; padding: 10px 16px; font-size: 14px; color: var(--ink-2);
-              background: #FAFAF8; border-bottom: 1px solid var(--line-2); }
+              background: var(--surface-2); border-bottom: 1px solid var(--line-2); }
   .game-bar b { font-family: var(--mono); color: var(--ink); }
-  .stage { height: 92px; display: flex; align-items: center; justify-content: center; background: #F1F2F4;
+  .stage { height: 92px; display: flex; align-items: center; justify-content: center; background: var(--stage);
            font-family: var(--mono); font-size: 34px; font-weight: 600; }
   .stage .prob { display: flex; align-items: center; gap: 14px; }
   .input { display: inline-flex; align-items: center; min-width: 110px; height: 52px; padding: 0 12px; border-radius: 6px;
-           background: #fff; border: 2px solid var(--accent); }
+           background: var(--surface); border: 2px solid var(--accent); }
   .ch { padding: 0 1px; border-radius: 3px; }
-  .ch.wrong { color: #B42318; background: #FDE7E5; }
+  .ch.wrong { color: var(--wrong-ink); background: var(--wrong-bg); }
   .caret { display: inline-block; width: 2px; height: 30px; margin-left: 2px; background: var(--ink); }
   .over { font-size: 26px; }
   .rec { display: flex; flex-direction: column; gap: 10px; }
@@ -87,7 +105,7 @@
   .yaxis .title { position: absolute; left: 0; writing-mode: vertical-rl; transform: translateY(50%) rotate(180deg);
                   font-family: 'Instrument Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-2); }
   .plot { position: relative; flex: 1 1 auto; min-width: 0; height: 270px; overflow: hidden; }
-  .grid { position: absolute; left: 0; right: 0; border-top: 1px dashed #D5D7DC; }
+  .grid { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--border); }
   .grid.base { border-top: 2px solid var(--ink); }
   .bars { position: relative; display: flex; align-items: flex-end; justify-content: flex-end; gap: 8px; height: 270px; }
   .bar { flex: 0 0 52px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px;
@@ -116,13 +134,13 @@
   .vline { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed var(--ink); }
   .vlab { position: absolute; top: 4px; font-size: 12px; font-weight: 600; padding-left: 6px; }
   .you { position: absolute; top: 24px; bottom: 0; width: 3px; margin-left: -1px; background: var(--you); }
-  .youlab { position: absolute; top: 24px; font-size: 12px; font-weight: 700; color: #0B6F66; padding-left: 6px; }
+  .youlab { position: absolute; top: 24px; font-size: 12px; font-weight: 700; color: var(--you-ink); padding-left: 6px; }
   .xaxis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--muted); }
   .heatwrap { display: flex; gap: 8px; }
   .rowlab { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; color: var(--muted); text-align: center; }
-  .heat { flex: 1 1 auto; min-width: 0; display: grid; gap: 1px; background: #fff; }
+  .heat { flex: 1 1 auto; min-width: 0; display: grid; gap: 1px; background: var(--surface); }
   .cell { border: 0; padding: 0; cursor: pointer; position: relative; }
-  .cell.hit { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--you); z-index: 2; }
+  .cell.hit { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--you); z-index: 2; }
   .collab { font-size: 12px; color: var(--muted); text-align: center; }
   .scale { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
   .scale i { flex: 1 1 auto; height: 10px; border-radius: 999px;
@@ -169,7 +187,7 @@
 <div class="page">
   <header>
     <div class="titles">
-    <h1><svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><rect x="0" y="0" width="14" height="14" rx="3" fill="#5DC184"/><rect x="21.2" y="0" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="42.4" y="0" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="0" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="84.8" y="0" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="0" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="0" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="21.2" y="21.2" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="42.4" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="63.6" y="21.2" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="84.8" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="106" y="21.2" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="0" y="42.4" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="21.2" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="42.4" y="42.4" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="63.6" y="42.4" width="14" height="14" rx="3" fill="#5DC184"/><rect x="84.8" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="0" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="21.2" y="63.6" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="42.4" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="63.6" width="14" height="14" rx="3" fill="#D9443B"/><rect x="84.8" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="63.6" width="14" height="14" rx="3" fill="#5DC184"/><rect x="0" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="21.2" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="42.4" y="84.8" width="14" height="14" rx="3" fill="#5DC184"/><rect x="63.6" y="84.8" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="84.8" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="106" y="84.8" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="0" y="106" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="21.2" y="106" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="42.4" y="106" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="106" width="14" height="14" rx="3" fill="#D9443B"/><rect x="84.8" y="106" width="14" height="14" rx="3" fill="#D9443B"/><rect x="106" y="106" width="14" height="14" rx="3" fill="#5DC184"/></svg>Zetamac Explorer</h1>
+    <h1><svg class="logo light" viewBox="0 0 120 120" aria-hidden="true"><rect x="0" y="0" width="14" height="14" rx="3" fill="#5DC184"/><rect x="21.2" y="0" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="42.4" y="0" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="0" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="84.8" y="0" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="0" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="0" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="21.2" y="21.2" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="42.4" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="63.6" y="21.2" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="84.8" y="21.2" width="14" height="14" rx="3" fill="#D9443B"/><rect x="106" y="21.2" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="0" y="42.4" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="21.2" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="42.4" y="42.4" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="63.6" y="42.4" width="14" height="14" rx="3" fill="#5DC184"/><rect x="84.8" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="42.4" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="0" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="21.2" y="63.6" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="42.4" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="63.6" width="14" height="14" rx="3" fill="#D9443B"/><rect x="84.8" y="63.6" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="106" y="63.6" width="14" height="14" rx="3" fill="#5DC184"/><rect x="0" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="21.2" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="42.4" y="84.8" width="14" height="14" rx="3" fill="#5DC184"/><rect x="63.6" y="84.8" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="84.8" y="84.8" width="14" height="14" rx="3" fill="#1F9D4C"/><rect x="106" y="84.8" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="0" y="106" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="21.2" y="106" width="14" height="14" rx="3" fill="#A9DFBD"/><rect x="42.4" y="106" width="14" height="14" rx="3" fill="#DADDE3"/><rect x="63.6" y="106" width="14" height="14" rx="3" fill="#D9443B"/><rect x="84.8" y="106" width="14" height="14" rx="3" fill="#D9443B"/><rect x="106" y="106" width="14" height="14" rx="3" fill="#5DC184"/></svg><svg class="logo dark" viewBox="-16 -16 152 152" aria-hidden="true"><rect x="-15.5" y="-15.5" width="151" height="151" rx="32" fill="#0E1016" stroke="#1E2330"/><rect x="0" y="0" width="14" height="14" rx="3" fill="#2E9F55"/><rect x="21.2" y="0" width="14" height="14" rx="3" fill="#4ADE80"/><rect x="42.4" y="0" width="14" height="14" rx="3" fill="#1E2330"/><rect x="63.6" y="0" width="14" height="14" rx="3" fill="#4ADE80"/><rect x="84.8" y="0" width="14" height="14" rx="3" fill="#1E2330"/><rect x="106" y="0" width="14" height="14" rx="3" fill="#1F5E3A"/><rect x="0" y="21.2" width="14" height="14" rx="3" fill="#F2645C"/><rect x="21.2" y="21.2" width="14" height="14" rx="3" fill="#1E2330"/><rect x="42.4" y="21.2" width="14" height="14" rx="3" fill="#F2645C"/><rect x="63.6" y="21.2" width="14" height="14" rx="3" fill="#1F5E3A"/><rect x="84.8" y="21.2" width="14" height="14" rx="3" fill="#F2645C"/><rect x="106" y="21.2" width="14" height="14" rx="3" fill="#4ADE80"/><rect x="0" y="42.4" width="14" height="14" rx="3" fill="#1F5E3A"/><rect x="21.2" y="42.4" width="14" height="14" rx="3" fill="#1E2330"/><rect x="42.4" y="42.4" width="14" height="14" rx="3" fill="#4ADE80"/><rect x="63.6" y="42.4" width="14" height="14" rx="3" fill="#2E9F55"/><rect x="84.8" y="42.4" width="14" height="14" rx="3" fill="#1E2330"/><rect x="106" y="42.4" width="14" height="14" rx="3" fill="#1E2330"/><rect x="0" y="63.6" width="14" height="14" rx="3" fill="#1E2330"/><rect x="21.2" y="63.6" width="14" height="14" rx="3" fill="#1F5E3A"/><rect x="42.4" y="63.6" width="14" height="14" rx="3" fill="#1E2330"/><rect x="63.6" y="63.6" width="14" height="14" rx="3" fill="#F2645C"/><rect x="84.8" y="63.6" width="14" height="14" rx="3" fill="#1E2330"/><rect x="106" y="63.6" width="14" height="14" rx="3" fill="#2E9F55"/><rect x="0" y="84.8" width="14" height="14" rx="3" fill="#4ADE80"/><rect x="21.2" y="84.8" width="14" height="14" rx="3" fill="#4ADE80"/><rect x="42.4" y="84.8" width="14" height="14" rx="3" fill="#2E9F55"/><rect x="63.6" y="84.8" width="14" height="14" rx="3" fill="#1E2330"/><rect x="84.8" y="84.8" width="14" height="14" rx="3" fill="#4ADE80"/><rect x="106" y="84.8" width="14" height="14" rx="3" fill="#1E2330"/><rect x="0" y="106" width="14" height="14" rx="3" fill="#1E2330"/><rect x="21.2" y="106" width="14" height="14" rx="3" fill="#1F5E3A"/><rect x="42.4" y="106" width="14" height="14" rx="3" fill="#1E2330"/><rect x="63.6" y="106" width="14" height="14" rx="3" fill="#F2645C"/><rect x="84.8" y="106" width="14" height="14" rx="3" fill="#F2645C"/><rect x="106" y="106" width="14" height="14" rx="3" fill="#2E9F55"/></svg>Zetamac Explorer</h1>
     <p class="sub">Mental arithmetic across 300+ million trials<br>and 7 million sessions.</p>
     </div>
     <nav aria-label="Resources">
@@ -177,10 +195,11 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>Paper</a>
       <a class="link" href="#">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Data</a>
-      <a class="link" href="https://github.com/HenryJames4/zetamac_explorer" target="_blank" rel="noopener">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>GitHub</a>
       <button class="link" type="button" id="citeBtn" aria-expanded="false" aria-controls="cite">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h4v4H7zM7 11c0 3-1 5-3 6M15 7h4v4h-4zM15 11c0 3-1 5-3 6"/></svg>Cite</button>
+      <button class="link theme" type="button" id="themeBtn" aria-label="Toggle dark mode">
+        <svg class="moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
       <a class="link play" href="https://arithmetic.zetamac.com/" target="_blank" rel="noopener">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>Play Zetamac</a>
     </nav>
@@ -414,7 +433,7 @@ function renderProblem() {
         </div>
         <div class="hist" id="hist"></div>
         <div class="xaxis"><span>0 s</span><span>2 s</span><span>4 s</span><span>6 s</span><span>8 s</span></div>
-        ${hasUser ? `<span style="font-size:14px;color:var(--ink-2)">This player took <strong style="color:#0B6F66">${fmt(pb.userRt)}</strong>, faster than ${Math.round(slowerShare(cur.hist, cur.n, pb.userRt) * 100)}% of attempts.</span>` : ''}
+        ${hasUser ? `<span style="font-size:14px;color:var(--ink-2)">This player took <strong style="color:var(--you-ink)">${fmt(pb.userRt)}</strong>, faster than ${Math.round(slowerShare(cur.hist, cur.n, pb.userRt) * 100)}% of attempts.</span>` : ''}
       </div>
       <div class="p-col" style="flex-basis:340px">
         <span class="h3">Every ${info.name} problem, by median RT</span>
@@ -445,7 +464,11 @@ function renderHist() {
 /* ============================== ALL GAMES VIEW ============================== */
 const R_MIN = 7, CROWD_R = 50;   // grid is 2r x r games; above CROWD_R rows it is drawn on the GPU
 const FADE = 600, SLOT = 100;    // flash fade (ms); keystroke timeline slot on the GPU (ms)
-const IDLE = [228, 230, 234], VIVID = [null, [46, 112, 49], [163, 58, 53]];   // --key and --err
+const PAL = {   // canvas colours per theme: idle square, --key and --err, text
+  light: { idle: [228, 230, 234], vivid: [null, [46, 112, 49], [163, 58, 53]], text: '#16181D' },
+  dark: { idle: [30, 35, 48], vivid: [null, [46, 159, 85], [224, 87, 79]], text: '#E8EAEE' },
+};
+const pal = () => PAL[document.documentElement.dataset.theme] || PAL.light;
 let SC = null;
 function answerOf(p) {
   const [, a, op, b] = p.match(/(\d+)([-+*/])(\d+)/), x = +a, y = +b;
@@ -534,21 +557,21 @@ function drawSquares() {
   const ctx = cv.getContext('2d'), cols = 2 * S.r, cell = W / cols, gap = cell > 6 ? Math.max(1, cell * 0.1) : 0;
   ctx.clearRect(0, 0, W, H);
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  const order = orderFor(cols * S.r);
+  const order = orderFor(cols * S.r), { idle, vivid } = pal();
   for (let i = 0; i < cols * S.r; i++) {
     const g = SC.games[order[i]], lt = (SC.t + mix(i, 2)) % g.len;   // each square has its own start offset
     let lo = 0, hi = g.keyT.length;
     while (lo < hi) { const m = (lo + hi) >> 1; if (g.keyT[m] <= lt) lo = m + 1; else hi = m; }
     const j = lo > 0 ? lo - 1 : g.keyT.length - 1, age = lo > 0 ? lt - g.keyT[j] : lt + g.len - g.keyT[j];
-    const f = age < FADE ? (1 - age / FADE) ** 1.5 : 0, c = VIVID[g.keyC[j]];
-    ctx.fillStyle = `rgb(${IDLE.map((x, k) => Math.round(x + (c[k] - x) * f))})`;
+    const f = age < FADE ? (1 - age / FADE) ** 1.5 : 0, c = vivid[g.keyC[j]];
+    ctx.fillStyle = `rgb(${idle.map((x, k) => Math.round(x + (c[k] - x) * f))})`;
     const x = (i % cols) * cell, y = Math.floor(i / cols) * cell;
     ctx.fillRect(x + gap / 2, y + gap / 2, cell - gap, cell - gap);
     if (cell / devicePixelRatio >= 13) cellText(ctx, g, lt, x, y, cell, j, age, f);
   }
 }
 function cellText(ctx, g, lt, x, y, cell, j, age, f) {
-  ctx.fillStyle = f > 0.5 ? '#fff' : '#16181D';   // white text on a fresh flash
+  ctx.fillStyle = f > 0.5 ? '#fff' : pal().text;   // white text on a fresh flash
   if (cell / devicePixelRatio >= 44) {            // big cells: problem and the input so far
     const tr = g.trials.find((t) => lt >= t.s && lt < t.s + t.n);
     if (!tr) return;
@@ -638,7 +661,6 @@ function initGL(cv) {
   ['uSlots', 'uGames', 'uT', 'uPool', 'uTf', 'uRows', 'uCols', 'uRes', 'uIdle', 'uOk', 'uErr'].forEach((k) => { u[k] = gl.getUniformLocation(prog, k); });
   gl.uniform1i(u.uSlots, 0); gl.uniform1i(u.uGames, 1);
   gl.uniform1ui(u.uPool, SC.pool);
-  gl.uniform3fv(u.uIdle, IDLE); gl.uniform3fv(u.uOk, VIVID[1]); gl.uniform3fv(u.uErr, VIVID[2]);
   return { gl, u, cv };
 }
 function drawCrowd() {
@@ -649,6 +671,8 @@ function drawCrowd() {
   if (cv.width !== W) { cv.width = W; cv.height = H; }
   gl.viewport(0, 0, W, H);
   gl.uniform1ui(u.uT, Math.floor(SC.t) >>> 0); gl.uniform1f(u.uTf, SC.t % 1);
+  const { idle, vivid } = pal();
+  gl.uniform3fv(u.uIdle, idle); gl.uniform3fv(u.uOk, vivid[1]); gl.uniform3fv(u.uErr, vivid[2]);
   gl.uniform1i(u.uRows, S.r); gl.uniform1i(u.uCols, 2 * S.r); gl.uniform2f(u.uRes, W, H);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
@@ -663,8 +687,8 @@ function renderToolbar() {
     right = sessions().map((s, i) =>
       `<button class="chip${S.session === i ? ' on' : ''}" data-act="session" data-v="${i}">${s.label}</button>`).join('') +
       `<button class="chip" data-act="pause" aria-label="${S.paused ? 'Play' : 'Pause'}">${S.paused
-        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="#16181D" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>'
-        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="#16181D" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>'}</button>`;
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>'}</button>`;
   } else if (S.mode === 'scale') {
     right = SC ? `<span class="label" id="scaleN">${scaleNote()}</span>
       <input class="slider" type="range" min="0" max="1000" step="100" value="${sliderFromR(S.r)}" aria-label="Number of games">` : '';
@@ -713,6 +737,12 @@ document.getElementById('citeBtn').addEventListener('click', (e) => {
   const c = document.getElementById('cite');
   c.hidden = !c.hidden;
   e.currentTarget.setAttribute('aria-expanded', String(!c.hidden));
+});
+
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t;
+  localStorage.setItem('theme', t);
 });
 
 /* ============================== LOOP ============================== */
